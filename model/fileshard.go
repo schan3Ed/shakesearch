@@ -85,6 +85,7 @@ func NewFileLoader(filename string) (FileLoadSharder, error) {
 			}
 			s.CompleteWorkShard += line + "\n"
 		}
+		f.Shards = append(f.Shards, s)
 		return f, nil
 	}
 }
