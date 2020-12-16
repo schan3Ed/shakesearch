@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"pulley.com/shakesearch/model"
 )
@@ -36,9 +37,9 @@ func searchByString(loader model.FileLoadSharder, searcher model.Searcher, s str
 		}
 		var res []string
 		if caseSen == "true" {
-			res = searcher.Search(s, f.CompleteWorkShard, f.SuffixShard)
+			res = searcher.Search(strings.ToLower(s), f.CompleteWorkShard, f.CaseSuffixShard)
 		} else {
-			res = searcher.Search(s, f.CompleteWorkShard, f.CaseSuffixShard)
+			res = searcher.Search(s, f.CompleteWorkShard, f.SuffixShard)
 		}
 		if len(res) == 0 {
 			continue

@@ -85,6 +85,8 @@ func NewFileLoader(filename string) (FileLoadSharder, error) {
 			}
 			s.CompleteWorkShard += line + "\n"
 		}
+		s.SuffixShard = suffixarray.New([]byte(s.CompleteWorkShard))
+		s.CaseSuffixShard = suffixarray.New([]byte(strings.ToLower(s.CompleteWorkShard)))
 		f.Shards = append(f.Shards, s)
 		return f, nil
 	}
