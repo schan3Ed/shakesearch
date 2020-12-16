@@ -13,6 +13,7 @@ const Controller = {
   updateTable: (results) => {
     const table = document.getElementById("table-body");
     const rows = [];
+    rows.push(`<tr>Content</tr>`)
     for (let result of results) {
       rows.push(`<tr>${result}<tr/>`);
     }
