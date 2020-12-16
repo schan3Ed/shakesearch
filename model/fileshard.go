@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"index/suffixarray"
 	"os"
+	"strings"
 )
 
 var bookTitles = map[string]bool{
@@ -58,6 +59,7 @@ type Shard struct {
 	Title             string
 	CompleteWorkShard string
 	SuffixShard *suffixarray.Index
+	CaseSuffixShard *suffixarray.Index
 }
 
 type FileLoadSharder struct {
@@ -77,6 +79,7 @@ func NewFileLoader(filename string) (FileLoadSharder, error) {
    			line := scanner.Text()
    			if bookTitles[line] {
    				s.SuffixShard = suffixarray.New([]byte(s.CompleteWorkShard))
+				s.CaseSuffixShard = suffixarray.New([]byte(strings.ToLower(s.CompleteWorkShard)))
 				f.Shards = append(f.Shards, s)
 				s = Shard{Title: line}
 			}

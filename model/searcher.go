@@ -10,7 +10,8 @@ import (
 //}
 
 
-type Searcher struct {}
+type Searcher struct {
+}
 
 func findPrevious(works string, idx int) int {
 	var count int

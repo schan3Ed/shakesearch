@@ -26,9 +26,32 @@ type SearchResult struct {
 	Results map[string][]string
 }
 
+func searchByString(loader model.FileLoadSharder, searcher model.Searcher, s string, caseSen string, book string) SearchResult {
+	var res SearchResult
+	results := make(map[string][]string)
+	var total int
+	for _, f := range loader.Shards {
+		if book != "" && f.Title != book {
+			continue
+		}
+		var res []string
+		if caseSen == "true" {
+			res = searcher.Search(s, f.CompleteWorkShard, f.SuffixShard)
+		} else {
+			res = searcher.Search(s, f.CompleteWorkShard, f.CaseSuffixShard)
+		}
+		if len(res) == 0 {
+			continue
+		}
+		results[f.Title] = res
+		total += len(res)
+	}
+	res.Results = results
+	res.Occur = total
+	return res
+}
+
 func HandleSearch(loader model.FileLoadSharder, searcher model.Searcher) func(w http.ResponseWriter, r *http.Request) {
-	var s SearchResult
-	s.Results = make(map[string][]string)
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, ok := r.URL.Query()["q"]
 		if !ok || len(query[0]) < 1 {
@@ -36,20 +59,16 @@ func HandleSearch(loader model.FileLoadSharder, searcher model.Searcher) func(w 
 			w.Write([]byte("missing search query in URL params"))
 			return
 		}
-
-		results := make(map[string][]string)
-		var total int
-		for _, f := range loader.Shards {
-			res := searcher.Search(query[0], f.CompleteWorkShard, f.SuffixShard)
-			if len(res) == 0 {
-				continue
-			}
-			results[f.Title] = res
-			total += len(res)
+		caseSen, ok := r.URL.Query()["case"]
+		bookName, ok := r.URL.Query()["name"]
+		var cas, book string
+		if len(bookName) == 1 {
+			book = bookName[0]
 		}
-		s.Results = results
-		s.Occur = total
-		sendJson(w, s)
+		if len(caseSen) == 1 {
+			cas = caseSen[0]
+		}
+		sendJson(w, searchByString(loader, searcher, query[0],cas, book))
 	}
 }
 
