@@ -22,10 +22,13 @@ func sendJson(w http.ResponseWriter, body interface{}) {
 }
 
 type SearchResult struct {
-
+	Occur int
+	Results map[string][]string
 }
 
 func HandleSearch(loader model.FileLoadSharder, searcher model.Searcher) func(w http.ResponseWriter, r *http.Request) {
+	var s SearchResult
+	s.Results = make(map[string][]string)
 	return func(w http.ResponseWriter, r *http.Request) {
 		query, ok := r.URL.Query()["q"]
 		if !ok || len(query[0]) < 1 {
@@ -34,12 +37,19 @@ func HandleSearch(loader model.FileLoadSharder, searcher model.Searcher) func(w 
 			return
 		}
 
-		var results []string
+		results := make(map[string][]string)
+		var total int
 		for _, f := range loader.Shards {
 			res := searcher.Search(query[0], f.CompleteWorkShard, f.SuffixShard)
-			results = append(results, res...)
+			if len(res) == 0 {
+				continue
+			}
+			results[f.Title] = res
+			total += len(res)
 		}
-		sendJson(w, results)
+		s.Results = results
+		s.Occur = total
+		sendJson(w, s)
 	}
 }
 

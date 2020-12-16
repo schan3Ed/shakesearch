@@ -18,7 +18,7 @@ func findPrevious(works string, idx int) int {
 		if works[i] == '\n' {
 			count++
 			if count == 4 {
-				return i
+				return i + 1
 			}
 		}
 	}

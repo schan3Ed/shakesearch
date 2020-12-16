@@ -5,19 +5,42 @@ const Controller = {
     const data = Object.fromEntries(new FormData(form));
     const response = fetch(`/search?q=${data.query}`).then((response) => {
       response.json().then((results) => {
+        Controller.updateMeta(results);
         Controller.updateTable(results);
       });
     });
   },
-
+  updateMeta: (results) => {
+    const table = document.getElementById("meta-body");
+    const rows = [];
+    rows.push("How many times this word show up? " + results.Occur + " times");
+    rows.push("<br>");
+    rows.push("How many books have this word? " + Object.keys(results.Results).length + " book");
+    table.innerHTML = rows;
+  },
   updateTable: (results) => {
     const table = document.getElementById("table-body");
+    const head = document.getElementById("table-head");
     const rows = [];
-    rows.push(`<tr>Content</tr>`)
-    for (let result of results) {
-      rows.push(`<tr>${result}<tr/>`);
+    const header = [];
+
+    header.push(`<tr</tr>`)
+    header.push(`<th>Book</th>`)
+    header.push(`<th>Content</th>`)
+    header.push(`<tr></tr>`)
+
+    for (book in results.Results) {
+      for (let lines of results.Results[book]) {
+        const l = lines.replace(/(\r\n|\n|\r)/gm, "<br>")
+        rows.push(`<tr><tr/>`);
+        rows.push(`<td>${book}<td/>`);
+        rows.push(`<td>${l}<td/>`);
+        rows.push(`<tr><tr/>`);
+      }
     }
+
     table.innerHTML = rows;
+    head.innerHTML = header;
   },
 };
 
